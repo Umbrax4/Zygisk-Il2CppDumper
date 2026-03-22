@@ -21,7 +21,7 @@
 void hack_start(const char *game_data_dir) {
     bool load = false;
     for (int i = 0; i < 10; i++) {
-        void *handle = xdl_open("liblogic.so", 0);
+        void *handle = xdl_open("libcsharp.so", 0);
         if (handle) {
             load = true;
 
@@ -32,7 +32,7 @@ void hack_start(const char *game_data_dir) {
                 char line[512];
                 while (fgets(line, sizeof(line), maps)) {
                     const char *slash = strrchr(line, '/');
-                    if (!slash || !strstr(slash, "liblogic.so")) continue;
+                    if (!slash || !strstr(slash, "libcsharp.so")) continue;
                     uintptr_t lo = 0, hi = 0;
                     sscanf(line, "%" SCNxPTR "-%" SCNxPTR, &lo, &hi);
                     if (base == 0 || lo < base) base = lo;
