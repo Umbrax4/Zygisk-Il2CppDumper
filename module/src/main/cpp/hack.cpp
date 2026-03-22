@@ -16,6 +16,7 @@
 #include <sys/mman.h>
 #include <linux/unistd.h>
 #include <array>
+#include <cinttypes>
 
 void hack_start(const char *game_data_dir) {
     bool load = false;
@@ -33,7 +34,7 @@ void hack_start(const char *game_data_dir) {
                     const char *slash = strrchr(line, '/');
                     if (!slash || !strstr(slash, "liblogic.so")) continue;
                     uintptr_t lo = 0, hi = 0;
-                    sscanf(line, "%lx-%lx", &lo, &hi);
+                    sscanf(line, "%" SCNxPTR "-%" SCNxPTR, &lo, &hi);
                     if (base == 0 || lo < base) base = lo;
                 }
                 fclose(maps);
@@ -41,8 +42,8 @@ void hack_start(const char *game_data_dir) {
                     char path[512];
                     snprintf(path, sizeof(path), "%s/liblogic_base.txt", game_data_dir);
                     FILE *f = fopen(path, "w");
-                    if (f) { fprintf(f, "0x%lx\n", base); fclose(f); }
-                    LOGI("liblogic.so base: 0x%lx", base);
+                    if (f) { fprintf(f, "0x%" PRIxPTR "\n", base); fclose(f); }
+                    LOGI("liblogic.so base: 0x%" PRIxPTR, base);
                 }
             }
 
