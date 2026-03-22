@@ -23,6 +23,29 @@ void hack_start(const char *game_data_dir) {
         void *handle = xdl_open("liblogic.so", 0);
         if (handle) {
             load = true;
+
+            // Save liblogic.so load base address for Ghidra rebasing
+            FILE *maps = fopen("/proc/self/maps", "r");
+            if (maps) {
+                uintptr_t base = 0;
+                char line[512];
+                while (fgets(line, sizeof(line), maps)) {
+                    const char *slash = strrchr(line, '/');
+                    if (!slash || !strstr(slash, "liblogic.so")) continue;
+                    uintptr_t lo = 0, hi = 0;
+                    sscanf(line, "%lx-%lx", &lo, &hi);
+                    if (base == 0 || lo < base) base = lo;
+                }
+                fclose(maps);
+                if (base) {
+                    char path[512];
+                    snprintf(path, sizeof(path), "%s/liblogic_base.txt", game_data_dir);
+                    FILE *f = fopen(path, "w");
+                    if (f) { fprintf(f, "0x%lx\n", base); fclose(f); }
+                    LOGI("liblogic.so base: 0x%lx", base);
+                }
+            }
+
             il2cpp_api_init(handle);
             il2cpp_dump(game_data_dir);
             break;
